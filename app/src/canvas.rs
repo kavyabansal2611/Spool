@@ -3129,21 +3129,25 @@ impl CanvasView {
     /// an object rang an error bell immediately before the object disappeared. A
     /// key that is about to do something must not announce that it is about to
     /// fail.
-    fn text_backspace(&mut self, _: &Backspace, _window: &mut Window, cx: &mut Context<Self>) {
-        if self.delete_a_character(false) {
-            diagnostics::count("canvas_notify", 1);
-            cx.notify();
-        }
-    }
+    
 
-    /// `⌦` inside a text buffer. Falls through to the editor-wide delete when
-    /// there is no buffer, for the reason [`Self::text_backspace`] gives.
-    fn text_delete(&mut self, _: &Delete, _window: &mut Window, cx: &mut Context<Self>) {
-        if self.delete_a_character(true) {
-            diagnostics::count("canvas_notify", 1);
-            cx.notify();
-        }
+   fn text_backspace(&mut self, _: &Backspace, _window: &mut Window, cx: &mut Context<Self>) {
+    if self.delete_a_character(false) {
+        diagnostics::count("canvas_notify", 1);
+        cx.notify();
+    } else {
+        cx.propagate();
     }
+}
+
+fn text_delete(&mut self, _: &Delete, _window: &mut Window, cx: &mut Context<Self>) {
+    if self.delete_a_character(true) {
+        diagnostics::count("canvas_notify", 1);
+        cx.notify();
+    } else {
+        cx.propagate();
+    }
+}
 
     /// Delete one character, or the selected range, from the open buffer.
     ///
